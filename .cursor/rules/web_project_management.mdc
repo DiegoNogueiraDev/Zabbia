@@ -1,0 +1,129 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# web_project_management.mdc – Universal MDC for High-Performance Web Projects
+
+> **Purpose**: Provide a reusable Master Design Contract (MDC) template for managing ANY modern web project that targets **high performance**, **premium UX/UI** and **predictable delivery**.
+
+---
+
+## 1 · Project Context (fill-in-the-blanks)
+```mdc
+PROJECT_NAME   = "zabbia"
+STACK_FRONTEND = "Next.js 15 | React 19 | Tailwind 3 | shadcn/ui"
+STACK_BACKEND  = "Node.js 20 | Fastify | PostgreSQL 16"
+LLM_PROVIDER   = "OpenRouter (meta-llama/llama-4-maverick:free)"   # if AI features required
+PERFORMANCE_BUDGET = "CLS ≤ 0.1 · LCP ≤ 2.5 s · TBT ≤ 200 ms"
+```
+
+**Vision**: Deliver a web product that scores ≥ 90 on Core Web Vitals, follows WCAG 2.2 AA accessibility, and delights users through NN/g usability heuristics.
+
+---
+
+## 2 · Roles & RACI
+| Role | Responsible | Accountable | Consulted | Informed |
+|------|-------------|-------------|-----------|----------|
+| Product Owner | ✓ | ✓ | | Stakeholders |
+| Tech Lead | ✓ | | UX Lead, DevOps | PO |
+| UX/UI Lead | ✓ | | PO, QA | Devs |
+| Dev Team | ✓ | | TL | QA |
+| QA / SDET | ✓ | | Devs | TL |
+
+---
+
+## 3 · Lifecycle Phases & Key Deliverables
+| Phase | Deliverable | Exit Criteria |
+|-------|-------------|---------------|
+| Inception | Vision doc, high-level backlog | Stakeholder sign-off |
+| Elaboration | Wireframes, perf budget, DOR | 80 % stories ready |
+| Construction (iterative Sprints) | Increment, test reports, DoD | All P0 stories done, CWV ≥ budget |
+| Transition | Release notes, runbook | Lighthouse PWA ≥ 90, zero sev-1 bugs |
+
+---
+
+## 4 · Definition-of-Ready (DOR)
+1. Acceptance criteria written (Gherkin).  
+2. Performance impact analysed vs budget.  
+3. UX spec linked (Figma).  
+4. API contract (OpenAPI) stubbed.  
+5. Test data available.
+
+## 5 · Definition-of-Done (DoD)
+1. All ACs met & peer review passed.  
+2. Unit ≥ 80 %, component ≥ 70 %, e2e ≥ 50 % (Test Pyramid).  
+3. LCP ≤ budget on 4G Moto G4.  
+4. WCAG 2.2 AA automated tests pass.  
+5. CI workflow green & artifact deployed to staging.  
+6. Docs updated.
+
+---
+
+## 6 · Engineering Standards
+- **Performance**: Enforce asset size limits with `bundlesize` + Lighthouse CI.  
+- **UX**: Adhere to NN/g 10 heuristics; run usability tests each release.  
+- **Accessibility**: Use axe-core, maintain 100 % a11y test coverage.  
+- **Security**: OWASP Top 10 checklist; Snyk scan in CI.  
+- **Quality Model**: Map features to ISO 25010 attributes (Perf, Usability, Security…).
+
+---
+
+## 7 · Metrics Dashboard
+| Metric | Target | Source |
+|--------|--------|--------|
+| LCP (p95) | ≤ 2.5 s | CWV RUM |
+| CLS (p95) | ≤ 0.1 | CWV RUM |
+| Uptime | ≥ 99.9 % | StatusPage |
+| Lead Time | ≤ 2 d | GitHub Actions |
+| Escape Defects / sprint | < 2 | QA reports |
+
+---
+
+## 8 · CI/CD Pipeline Stages
+1. **Lint & Type-check**  
+2. **Unit ➜ Component ➜ e2e** (Test Pyramid)  
+3. **Build** (Next `next build` / server `docker build`)  
+4. **Perf budget check** via Lighthouse CI  
+5. **Deploy** to staging via GitHub Environments  
+6. **Manual gate** → production (ArgoCD)
+
+---
+
+## 9 · Sprint Rituals
+| Ritual | Cadence | Owner | Artifact |
+|--------|---------|-------|----------|
+| Planning | Day 1 | PO & TL | Sprint backlog |
+| Daily Stand-up | Daily | TL | Blocker list |
+| Grooming | Weekly | PO | Refined backlog |
+| Review | End of sprint | Team | Demo video |
+| Retro | End of sprint | Scrum Master | Action items |
+
+---
+
+## 10 · Risk Log Template
+```risk
+ID, Description, Impact (1-5), Likelihood (1-5), Mitigation, Owner, Status
+```
+
+---
+
+## 11 · Change Management
+- Any scope change > 2 SP requires PO + TL approval.  
+- Version SEMVER; tag releases `vMAJOR.MINOR.PATCH`.
+
+---
+
+## 12 · Appendix – References
+- Core Web Vitals – Google  
+- Web.dev Performance Budgets  
+- NN/g 10 Usability Heuristics  
+- WCAG 2.2  
+- ISO/IEC 25010  
+- Atlassian Definition-of-Done  
+- Martin Fowler Test Pyramid
+
+---
+
+> **End of Template** – Copy & adapt values in §1, then commit this MDC at `/docs/PROJECT_NAME.mdc`.  
+> All teams must sign before sprint 1.

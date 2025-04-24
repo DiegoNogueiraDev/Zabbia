@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # Banco de dados (PostgreSQL com schema Zabbix)
+  db:
+    image: postgres:16
+    container_name: zabbia_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: zabbia
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql # Arquivo de inicialização para criar schema Zabbix
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Backend (FastAPI)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: zabbia_backend
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/zabbia
+      - JWT_SECRET=zabbia_super_secret_key_change_in_production
+      - MCP_SERVER_URL=http://mcp:8080
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "python -c 'from app.services.database import create_db_and_tables; create_db_and_tables()' && 
+             uvicorn app.main:app --host 0.0.0.0 --port 8000"
+
+  # MCP Server (LangChain + OpenRouter)
+  mcp:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: zabbia_mcp
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/zabbia
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    command: python -m mcp_server.server
+
+  # Frontend (Next.js)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:8000
+    container_name: zabbia_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+      - mcp
+
+volumes:
+  postgres_data: 

@@ -1,0 +1,159 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# zabbia.mdc – Master Design Contract · **REV‑3** (2025‑04‑23)
+
+> **Status:** Draft – pending Product Owner approval  
+> **Scope:** Define generation & runtime behaviour of the Zabbia Copilot.
+
+---
+
+## 1 · Visão Geral do Projeto
+**Zabbia** é um _AI Copilot_ especializado em **Observabilidade Zabbix 6.0+**.  
+O sistema combina **LLM (OpenRouter › meta-llama/llama-4-maverick:free)** com **consultas SQL/API** para transformar linguagem natural em insight técnico, gráficos e automações.
+
+### 1.1 Objetivos SMART
+| Meta | Indicador | Alvo |
+|------|-----------|------|
+| **Insight Rápido** | Latência da 1ª resposta | ≤ 3 s |
+| **Cobertura** | N° de intents mapeadas | ≥ 95 % CUs |
+| **Licenciamento** | Tentativas de uso sem licença | 0 |
+
+---
+
+## 2 · Casos de Uso‑Núcleo (CU)
+| ID | NL Exemplo | Tipo | Saída | Prioridade |
+|----|------------|------|-------|------------|
+| CU‑01 | "Hosts com CPU > 80 % (30 min)" | query | tabela | P0 |
+| CU‑02 | "Gráfico RAM db01 24 h" | graph | JSON chart | P0 |
+| CU‑03 | "Coloque web02 em manutenção 2 h" | action | API call | P1 |
+| CU‑04 | "Resuma alertas críticos de hoje" | summary | markdown | P1 |
+| CU‑05 | "Prever uso disco web cluster 7 d" | predict | chart + texto | P2 |
+
+---
+
+## 3 · Arquitetura Física
+```
+┌────────────────────┐  WebSocket  ┌────────────────────┐ gRPC/json ┌────────────────┐
+│ Next.js Frontend   │────────────▶│ FastAPI Gateway    │──────────▶│ LLM MCP Server │
+│  (Dashboard, Chat) │◀────────────│  Auth+Licensing    │   async   └────────────────┘
+└────────────────────┘             │  SQL Layer (SQLModel)           ▲
+       ▲                           └───────────┬───────────┘         │
+       │        REST /api             🔄Cache Layer (Redis)          │
+       ▼                                                           SQL/API
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           Zabbix DB + API                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 4 · Contrato de Integração MCP
+### 4.1 Formatos Padronizados
+- **SQL** → bloco ```SQL>``` seguido de consulta parametrizada (`:from`, `:to`, `:limit`).
+- **API** → bloco ```API>``` + método JSON‑RPC.
+- **Gráfico** → bloco ```PLOT_SCHEMA>``` contendo:
+```json
+{"chartType":"line","labels":["2025‑04‑22T18:00Z",…],"datasets":[{"label":"CPU%","data":[12,45,…]}]}
+```
+- **Tabela** → markdown, máx 50 linhas; excedente = *… (+n)*.
+
+### 4.2 Detecção de Intenção
+Algoritmo seq.: `regex hints` → `OpenAI function‑calling` → *fallback heur.*
+
+### 4.3 Regras de Segurança
+1. Sempre **bind‑params**; proibir `;` e `--` fora de string.  
+2. Verificar `X-License-Key` antes de qualquer ação de escrita.  
+3. Limite 60 req/min/token (Redis‑Leaky‑Bucket).
+
+---
+
+## 5 · Modelos de Dados Essenciais Zabbix 6
+| Tabela | FKs | Observações |
+|--------|-----|-------------|
+| `hosts` | interfaceid, proxy_hostid | status: 0=up 1=down |
+| `items` | hostid | key_ exemplos: `system.cpu.util[,idle]`, `vm.memory.size[available]` |
+| `history_uint` | itemid | Para value_type 3 |
+| `history` (float) | itemid | value_type 0 |
+| `triggers` | expression | priority 0‑5 |
+| `events` | triggerid | value 1=PROBLEM, 0=OK |
+
+#### 5.1 Templates SQL Reutilizáveis
+```sql
+-- avg CPU util last X minutes
+SELECT h.hostid, h.name,
+       100 - avg(hu.value) AS cpu
+FROM hosts h
+JOIN items i USING(hostid)
+JOIN history_uint hu USING(itemid)
+WHERE i.key_='system.cpu.util[,idle]'
+  AND hu.clock > :since
+GROUP BY 1,2
+HAVING 100 - avg(hu.value) > :threshold
+ORDER BY cpu DESC;
+```
+
+---
+
+## 6 · UI & UX
+- **Sidebar**: `Dashboard`, `Chat`, `Configurações` – ícones Lucide.  
+- **Dashboard** Widgets:
+  1. CPU/RAM/Disk line‑chart por host/cluster.
+  2. Tabela _Hosts em Alerta_.
+  3. KPI cards Uptime médio, Triggers ativas.
+- **Estilo**: Tailwind v3, glass‑morphism opcional, tema Dark/Light com `next-themes`.
+- **Motion**: Framer Motion `layout` anim para troca de rota.
+
+---
+
+## 7 · Licenciamento
+| Campo JWT | Tipo | Exemplo |
+|-----------|------|---------|
+| `cust` | string | "ACME" |
+| `exp` | epoch  | 1767139200 |
+| `seats` | int   | 20 |
+
+Middleware `verify_license` bloqueia se `exp < now` ou contagem ativa > seats.
+CLI:
+```bash
+python -m licensing.generate --customer "ACME" --seats 20 --days 365
+```
+
+---
+
+## 8 · Qualidade & Observabilidade
+- **Testes**: pytest‑cov ≥ 90 %; jest+RTL ≥ 90 %; playwright smoke.  
+- **CI**: GitHub Actions (lint, test, build, Docker push).  
+- **Metrics**: Prometheus ‑ scrape backend; Grafana dashboard _Zabbia Health_.
+
+---
+
+## 9 · Comandos do Agente
+| Comando | Descrição |
+|---------|-----------|
+| `/init` | Gera scaffold completo. |
+| `/sql <Q>` | Somente SQL. |
+| `/graph <Q>` | Somente JSON Schema. |
+| `/api <A>` | Somente payload Zabbix API. |
+| `/test <domínio>` | Caso de teste unitário. |
+
+---
+
+## 10 · Critérios de Aceite Final
+1. **docker compose up** → sucesso; frontend em `:3000`, backend `:8000/docs`.  
+2. Dashboard exibe 3 gráficos + tabela; atualização máx 30 s.  
+3. Licença inválida → 401 + JSON erro.  
+4. Lighthouse PWA score ≥ 90.  
+5. Todo CU‑P0 atendido.
+
+---
+
+## 11 · Chave de Conclusão
+Responder `DONE::<feature>` quando completar qualquer entrega rastreável.
+
+---
+
+> **Fim do Documento – Alterações requerem revisão do Product Owner & versionamento semântico.**
+

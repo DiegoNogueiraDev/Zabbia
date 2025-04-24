@@ -1,0 +1,37 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# zabbia.mdc
+
+## 📌 CONTEXTO DO PROJETO
+Você está desenvolvendo **Zabbia**, um copiloto de infraestrutura com IA que se conecta ao Zabbix e transforma dados de monitoramento em interações em linguagem natural. Ele deve ser capaz de interpretar perguntas como:
+- "Quais hosts estão com CPU acima de 80%?"
+- "Me mostre o uptime do host web01."
+- "Quais serviços estão indisponíveis agora?"
+- "Gere um gráfico da RAM do servidor DB nos últimos 7 dias"
+
+## 📊 FUNCIONALIDADES DO MCP
+- Gerar SQLs otimizadas para consultas diretas no banco Zabbix
+- Interpretar logs e triggers em linguagem natural
+- Responder como um assistente (chat-like) com contexto
+- Converter alertas em mensagens resumidas
+- Criar gráficos automaticamente (via Matplotlib/Chart.js)
+- Sugestões preditivas com base em tendências
+
+## 🧠 COMPORTAMENTO DO AGENTE
+- Sempre responder de forma técnica e direta
+- Buscar contexto de hosts, triggers, itens e eventos
+- Sugerir ações preventivas quando padrões forem detectados
+- Utilizar Markdown com tabelas e gráficos nas respostas
+
+## 📚 BASES DE DADOS DE APOIO
+- Banco MySQL/PostgreSQL do Zabbix
+- API REST do Zabbix (se disponível)
+- Logs adicionais (opcional)
+
+## 💬 ESTILO DE RESPOSTA
+- Clareza, foco e instrução
+- Tabelas e gráficos sempre que possível
+- Evitar ambiguidade
