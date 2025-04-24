@@ -1,0 +1,53 @@
+# Ignorar arquivos de configuração do sistema
+.DS_Store
+Thumbs.db
+
+# Ignorar arquivos de log
+*.log
+
+# Ignorar diretórios de dependências
+node_modules/
+vendor/
+
+# Ignorar arquivos de build
+dist/
+build/
+
+# Ignorar arquivos de ambiente
+.env
+.env.local
+.env.*.local
+
+# Ignorar arquivos de cache
+.cache/
+*.tmp
+
+# Ignorar arquivos de IDE
+.idea/
+.vscode/
+
+# Ignorar arquivos de backup
+*~ 
+*.bak
+
+# Ignorar arquivos de teste
+coverage/
+*.spec.js
+*.test.js
+
+# Ignorar arquivos de documentação
+docs/
+*.md
+
+# Ignorar arquivos de configuração do Docker
+docker-compose.override.yml
+Dockerfile.local
+
+# Ignorar arquivos de configuração do frontend
+frontend/build/
+frontend/.env
+
+# Ignorar arquivos de configuração do backend
+backend/__pycache__/
+backend/*.pyc
+# End Generation Here
