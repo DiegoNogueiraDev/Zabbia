@@ -1,0 +1,40 @@
+# Requisitos do Zabbia - Copiloto de Infraestrutura para Zabbix
+
+# Framework Web
+fastapi>=0.95.0
+uvicorn[standard]>=0.20.0
+pydantic>=1.10.7
+pydantic-settings>=2.0.0
+
+# HTTP e comunicação
+requests>=2.28.2
+httpx>=0.23.3
+websockets>=10.4
+
+# Processamento de dados
+numpy>=1.24.2
+pandas>=1.5.3
+matplotlib>=3.7.1
+
+# Bancos de dados
+sqlalchemy>=2.0.9
+pymysql>=1.0.3
+psycopg2-binary>=2.9.5
+redis>=4.5.4
+
+# Utilidades
+python-dotenv>=1.0.0
+pyjwt>=2.6.0
+python-multipart>=0.0.6
+cryptography>=40.0.2
+
+# Logging e monitoramento
+prometheus-client>=0.16.0
+opentelemetry-api>=1.16.0
+opentelemetry-sdk>=1.16.0
+opentelemetry-exporter-prometheus>=0.38b0
+
+# Testes
+pytest>=7.3.1
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0 

@@ -1,0 +1,108 @@
+version: '3.8'
+
+services:
+  # Serviço da API backend
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    container_name: zabbia-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./config:/app/config
+    environment:
+      - DEBUG=true
+      - ENVIRONMENT=development
+      - HOST=0.0.0.0
+      - PORT=8000
+      - LOG_LEVEL=INFO
+      - ZABBIA_CONFIG=/app/config/zabbia.json
+    depends_on:
+      - redis
+    networks:
+      - zabbia-network
+
+  # Frontend do Zabbia
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+    container_name: zabbia-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    networks:
+      - zabbia-network
+
+  # Cache Redis
+  redis:
+    image: redis:7.4-alpine
+    container_name: zabbia-redis
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    networks:
+      - zabbia-network
+
+  # Opcional: Serviço do Zabbix para testes
+  # Descomente para usar um ambiente Zabbix completo para testes
+  zabbix-server:
+    image: zabbix/zabbix-server-mysql:ubuntu-6.0-latest
+    container_name: zabbix-server
+    restart: unless-stopped
+    environment:
+      - DB_SERVER_HOST=zabbix-db
+      - MYSQL_DATABASE=zabbix
+      - MYSQL_USER=zabbix
+      - MYSQL_PASSWORD=zabbix
+      - MYSQL_ROOT_PASSWORD=zabbix_root_pwd
+    depends_on:
+      - zabbix-db
+    networks:
+      - zabbia-network
+
+  zabbix-web:
+    image: zabbix/zabbix-web-nginx-mysql:ubuntu-6.0-latest
+    container_name: zabbix-web
+    restart: unless-stopped
+    environment:
+      - DB_SERVER_HOST=zabbix-db
+      - MYSQL_DATABASE=zabbix
+      - MYSQL_USER=zabbix
+      - MYSQL_PASSWORD=zabbix
+      - ZBX_SERVER_HOST=zabbix-server
+    ports:
+      - "8080:8080"
+    depends_on:
+      - zabbix-server
+    networks:
+      - zabbia-network
+
+  zabbix-db:
+    image: mysql:8.0
+    container_name: zabbix-db
+    restart: unless-stopped
+    environment:
+      - MYSQL_DATABASE=zabbix
+      - MYSQL_USER=zabbix
+      - MYSQL_PASSWORD=zabbix
+      - MYSQL_ROOT_PASSWORD=zabbix_root_pwd
+    command: --character-set-server=utf8 --collation-server=utf8_bin --default-authentication-plugin=mysql_native_password
+    volumes:
+      - zabbix-db-data:/var/lib/mysql
+    networks:
+      - zabbia-network
+
+volumes:
+  redis-data:
+  zabbix-db-data:
+
+networks:
+  zabbia-network:
+    driver: bridge 

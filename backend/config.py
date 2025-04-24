@@ -55,6 +55,40 @@ class ZabbiaConfig:
             if os.path.exists(config_path):
                 with open(config_path, 'r') as f:
                     config_data = json.load(f)
+                    
+                    # Verificar se o arquivo usa a estrutura antiga com 'zabbix'
+                    if 'zabbix' in config_data:
+                        # Converter formato antigo para o novo
+                        zabbix_data = config_data['zabbix']
+                        zabbix_db = zabbix_data.get('db', {})
+                        
+                        new_config = {
+                            'zabbix_api_url': zabbix_data.get('api_url'),
+                            'zabbix_username': zabbix_data.get('username'),
+                            'zabbix_password': zabbix_data.get('password'),
+                            'zabbix_db_host': zabbix_db.get('host'),
+                            'zabbix_db_port': zabbix_db.get('port'),
+                            'zabbix_db_name': zabbix_db.get('name'),
+                            'zabbix_db_user': zabbix_db.get('user'),
+                            'zabbix_db_password': zabbix_db.get('password'),
+                        }
+                        
+                        # Adicionar outras configurações
+                        if 'logging' in config_data:
+                            new_config['log_level'] = config_data['logging'].get('level')
+                        
+                        if 'server' in config_data:
+                            new_config['server_host'] = config_data['server'].get('host')
+                            new_config['server_port'] = config_data['server'].get('port')
+                            new_config['server_workers'] = config_data['server'].get('workers')
+                        
+                        if 'cache' in config_data:
+                            new_config['cache_url'] = config_data['cache'].get('url')
+                            new_config['cache_timeout'] = config_data['cache'].get('timeout_seconds')
+                        
+                        return cls(**new_config)
+                        
+                    # Se usar o formato novo, usa diretamente
                     return cls(**config_data)
             else:
                 logger.warning(f"Arquivo de configuração não encontrado: {config_path}")
@@ -104,10 +138,17 @@ class Settings(BaseSettings):
     # Configurações de ambiente
     debug: bool = os.getenv("DEBUG", "False").lower() == "true"
     environment: str = os.getenv("ENVIRONMENT", "development")
+    is_development: bool = os.getenv("ENVIRONMENT", "development") == "development"
     
     # Configurações do servidor
     host: str = os.getenv("HOST", "0.0.0.0")
     port: int = int(os.getenv("PORT", "8000"))
+    server_host: str = os.getenv("SERVER_HOST", "0.0.0.0")
+    server_port: int = int(os.getenv("SERVER_PORT", "8000"))
+    server_workers: int = int(os.getenv("SERVER_WORKERS", "1"))
+    
+    # Configurações CORS
+    cors_origins: list = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:8000").split(",")
     
     # Configurações da API Zabbix
     zabbix_url: str = os.getenv("ZABBIX_URL", "http://localhost/zabbix/api_jsonrpc.php")

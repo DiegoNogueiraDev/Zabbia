@@ -1,0 +1,21 @@
+{
+  "zabbix_db_host": "localhost",
+  "zabbix_db_port": 3306,
+  "zabbix_db_name": "zabbix",
+  "zabbix_db_user": "zabbix",
+  "zabbix_db_password": "zabbix",
+  "zabbix_api_url": "http://seu-servidor-zabbix/api_jsonrpc.php",
+  "zabbix_username": "Admin",
+  "zabbix_password": "zabbix",
+  "api_version": "6.0",
+  "log_level": "INFO",
+  "cache_timeout": 300,
+  "result_limit": 1000,
+  "timezone": "America/Sao_Paulo",
+  "server_host": "0.0.0.0",
+  "server_port": 8000,
+  "server_workers": 1,
+  "cors_origins": ["http://localhost:3000", "http://localhost:8000"],
+  "cache_url": "redis://redis:6379/0",
+  "is_development": true
+} 

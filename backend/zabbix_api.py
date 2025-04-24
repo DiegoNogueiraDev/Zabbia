@@ -30,13 +30,13 @@ class ZabbixAPIClient:
         """Inicializa o cliente da API Zabbix
         
         Args:
-            api_url: URL da API do Zabbix (ex: http://zabbix.exemplo.com/api_jsonrpc.php)
-            username: Nome de usuário para autenticação
-            password: Senha para autenticação
+            api_url: URL da API Zabbix (opcional, padrão da configuração)
+            username: Nome de usuário (opcional, padrão da configuração)
+            password: Senha (opcional, padrão da configuração)
             api_token: Token de API (opcional, alternativa a username/password)
             api_version: Versão da API do Zabbix (ex: 6.0)
         """
-        self.api_url = api_url or settings.zabbix_api_url
+        self.api_url = api_url or settings.zabbix_url
         self.username = username or settings.zabbix_username
         self.password = password or settings.zabbix_password
         self.api_token = api_token

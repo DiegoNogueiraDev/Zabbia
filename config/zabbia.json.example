@@ -1,0 +1,55 @@
+{
+  "zabbix": {
+    "api_url": "http://seu-servidor-zabbix/api_jsonrpc.php",
+    "username": "Admin",
+    "password": "zabbix",
+    "db": {
+      "host": "localhost",
+      "port": 3306,
+      "name": "zabbix",
+      "user": "zabbix",
+      "password": "zabbix",
+      "type": "mysql"
+    }
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "logs/zabbia.log",
+    "max_size_mb": 10,
+    "backup_count": 5
+  },
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8000,
+    "workers": 1
+  },
+  "cache": {
+    "enabled": true,
+    "url": "redis://localhost:6379/0",
+    "timeout_seconds": 300
+  },
+  "ai": {
+    "provider": "openrouter",
+    "model": "meta-llama/llama-4-maverick:free",
+    "api_key": "",
+    "temperature": 0.1,
+    "max_tokens": 1000
+  },
+  "license": {
+    "key": "",
+    "customer": "",
+    "seats": 1,
+    "expires": "2025-12-31"
+  },
+  "limits": {
+    "result_limit": 100,
+    "rate_limit_per_minute": 60,
+    "max_query_length": 500
+  },
+  "features": {
+    "enable_graphs": true,
+    "enable_maintenance": true,
+    "enable_sql_direct": false,
+    "enable_api_direct": false
+  }
+} 
